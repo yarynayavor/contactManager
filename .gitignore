@@ -7,6 +7,8 @@
 /node_modules
 /native-base-theme
 
+/.idea
+
 # misc
 .env.local
 .env.development.local

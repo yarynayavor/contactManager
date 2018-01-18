@@ -27,7 +27,7 @@ super();
             <StatusBar translucent={false}
                        backgroundColor="#002733"
                        barStyle="light-content"
-                       hidden={false} />
+                       hidden={true} />
             <AllTabs/>
             {/*console.log({'hello'});*/}
         </View>

@@ -1,5 +1,4 @@
 import React from 'react';
-//import {Text,View,StyleSheet} from 'react-native';
 import { Text, View,
     Button, StyleSheet,
     Image, ScrollView,
@@ -7,7 +6,6 @@ import { Text, View,
     TouchableHighlight,
     Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Logs from '../tabs/Logs';
 
 export default class ContactList extends React.Component {
 
@@ -28,7 +26,6 @@ export default class ContactList extends React.Component {
     }
 
     componentDidMount() {
-
         let {contacts} = this.state;
 
         AsyncStorage.getItem('contacts').then((data) => {
@@ -37,7 +34,7 @@ export default class ContactList extends React.Component {
                     contacts: JSON.parse(data),
                 });
             } else {
-                fetch("https://randomuser.me/api/?nat=gb&inc=name,email,cell,picture&results=10").then(x => {
+                fetch("https://randomuser.me/api/?nat=gb&inc=name,email,cell,picture&results=20").then(x => {
                     const results = JSON.parse(x._bodyInit).results;
                     results.map((contact) => {
                         contacts.push({
@@ -53,6 +50,15 @@ export default class ContactList extends React.Component {
             }
 
         });
+
+        AsyncStorage.getItem('logs').then((data) => {
+            if(data) {
+                this.setState({
+                    logs: JSON.parse(data),
+                });
+            }
+        });
+
     }
 
     onPressDetails(contact) {
@@ -71,23 +77,13 @@ export default class ContactList extends React.Component {
             { cancelable: false }
         );
 
-        logs.push({
+        logs.unshift({
             firstName: contact.firstName,
             lastName: contact.lastName,
             cellPhone: contact.cellPhone,
             callDuration:'00:00:01'
         });
-        // this.props.navigation.dispatch(
-        //     {
-        //         type: 'Navigation/NAVIGATE',
-        //         routeName: 'Logs',
-        //         action: {
-        //             type: 'Navigation/NAVIGATE',
-        //             routeName: 'Logs',
-        //         }
-        //     }
-        // );
-        this.props.navigation.navigate("Logs", {logs: logs});
+        // this.props.navigation.navigate("Logs", {logs: logs});
         this.setState({logs });
         AsyncStorage.setItem('logs', JSON.stringify(logs));
 
@@ -99,7 +95,6 @@ export default class ContactList extends React.Component {
         return (
             <TouchableNativeFeedback key={index} onPress={()=> {this.onPressDetails(contact)}}>
                 <View style={styles.contact}>
-                    {/*<Image style={styles.image} source={{ uri: contact.picture.thumbnail }} />*/}
                     <Icon style={styles.image} name="user-circle" size={35} color="#b2edff"/>
                     <View style={styles.contactUser}>
 
@@ -199,14 +194,14 @@ const styles = StyleSheet.create({
     },
     contactName: {
         fontWeight:'700',
-        fontSize:22
+        fontSize:18
     },
 
     contactNameLast: {
 
     },
     contactCell: {
-        fontSize:18
+        fontSize:15
     },
     image: {
         marginLeft: 10,
@@ -214,7 +209,6 @@ const styles = StyleSheet.create({
     },
     dial: {
         marginLeft: 'auto',
-        marginTop:10,
         backgroundColor:'#e5f9ff',
         paddingLeft:15,
         paddingRight:15,

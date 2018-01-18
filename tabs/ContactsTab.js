@@ -4,13 +4,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {StackNavigator} from 'react-navigation';
 import ContactList from '../screens/ContactList';
 import ContactDetails from '../screens/ContactDetails';
-import Logs from '../tabs/Logs';
+
 
 const ContactsScreenNavigator=StackNavigator({
     ContactList: {screen:ContactList},
-    ContactDetails: {screen:ContactDetails},
-    Logs:{screen:Logs}
-
+    ContactDetails: {screen:ContactDetails}
 },{
     headerMode: 'none',
     navigationOptions: {

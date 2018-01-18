@@ -1,18 +1,81 @@
 import React from 'react';
-import {Text,View,Image,Button,StyleSheet} from 'react-native';
+import {Text, View, Image, Button, StyleSheet, AsyncStorage,ScrollView,
+    TouchableNativeFeedback} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import IconL from 'react-native-vector-icons/FontAwesome';
 
 export default class Favorites extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            text: '',
+            favorites:[],
+        }
+    }
+
     static navigationOptions = {
         tabBarLabel:'Favorites',
         tabBarIcon: () => {
             return <Icon name="favorite" size={25} color="#fff"/>;
         }
     }
+
+    getFavorites = () =>  {
+        let {favorites} = this.state;
+        // AsyncStorage.removeItem('favorites');
+        return AsyncStorage.getItem('favorites').then((data) => {
+            if(data) {
+                this.setState({
+                    favorites: JSON.parse(data),
+                });
+            } else {
+                this.setState({
+                    favorites
+                });
+            }
+        });
+    }
+
+    componentWillUpdate(){
+        this.getFavorites();
+    }
+
+    componentWillMount() {
+        this.getFavorites();
+    }
+
+    drawContent(favorite, index) {
+        return (
+            <TouchableNativeFeedback key={index} onPress={()=> {}}>
+                <View style={styles.contact}>
+                    <IconL style={styles.image} name="user-circle" size={35} color="#b2edff"/>
+                    <View style={styles.contactUser}>
+
+                        <Text style={styles.contactName}>
+                            <Text>{favorite.firstName} </Text>
+                            <Text style={styles.contactNameLast}>{favorite.lastName}</Text>
+                        </Text>
+                        <Text style={styles.contactCell}>{favorite.cellPhone}</Text>
+                    </View>
+                    <Icon style={styles.favorites} name="favorite" size={45} color="red"/>
+                </View>
+            </TouchableNativeFeedback>
+        );
+    }
+
     render() {
         return (
             <View>
-                <Text style={styles.text}>Favorites</Text>
+                {/*<Text style={styles.text}>Logs</Text>*/}
+                <ScrollView style={styles.wrapper}>
+                    {this.state.favorites && this.state.favorites.map((favorite, index) => {
+                        return this.drawContent(favorite, index)
+                    })}
+                </ScrollView>
+
+                {/*<Text style={styles.text}>{this.state.noLogs}</Text>*/}
+
             </View>
         );
     }
@@ -20,9 +83,50 @@ export default class Favorites extends React.Component {
 
 const styles=StyleSheet.create({
     text: {
-        fontSize:25,
-        marginTop:30,
-        backgroundColor:'#6f8888',
+        fontSize:20,
+        marginTop:10,
         textAlign:'center',
     },
+    contact: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderBottomColor: '#849999',
+        padding:10
+    },
+    contactUser: {
+        paddingLeft:20
+    },
+    contactName: {
+        fontWeight:'700',
+        fontSize:18
+    },
+    contactCell: {
+        fontSize:15
+    },
+    image: {
+        marginLeft: 10,
+        marginTop:10
+    },
+    favorites: {
+        marginLeft: 'auto',
+        paddingTop:5,
+        paddingBottom:5
+    },
 });
+//     render() {
+//         return (
+//             <View>
+//                 <Text style={styles.text}>Favorites</Text>
+//             </View>
+//         );
+//     }
+// }
+//
+// const styles=StyleSheet.create({
+//     text: {
+//         fontSize:25,
+//         marginTop:30,
+//         backgroundColor:'#6f8888',
+//         textAlign:'center',
+//     },
+// });

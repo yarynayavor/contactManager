@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, Image, StyleSheet,Button,TouchableHighlight } from 'react-native';
+import {Text, View, Image, StyleSheet, Button, TouchableHighlight, AsyncStorage, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IconF from 'react-native-vector-icons/MaterialIcons';
 
@@ -12,14 +12,80 @@ export default class ContactDetails extends React.Component {
             contact: [],
             favorites:[]
         }
+
+        this.onPressFavorites = this.onPressFavorites.bind(this);
+        this.deleteContact = this.deleteContact.bind(this);
     }
 
     componentDidMount() {
+
+
+        let {favorites} = this.state;
         this.setState({ contact: this.props.navigation.state.params.contact });
+        AsyncStorage.getItem('favorites').then((data) => {
+            if(data) {
+                this.setState({
+                    favorites: JSON.parse(data),
+                });
+            }
+        });
+    }
+
+    deleteContact(contact) {
+        // let {contacts} = this.state;
+        // let _contacts = contacts.filter(c => c.id != _id);
+        // localStorage.setItem('tasks', JSON.stringify(_contacts));
+        //
+        // this.setState({
+        //     contacts: _contacts
+        // })
     }
 
     onPress() {
         this.props.navigation.navigate("ContactList");
+    }
+
+    checkDublicates(contact) {
+        let {favorites} = this.state;
+        for (var i = 0; i < favorites.length; i++) {
+            if(favorites[i].cellPhone==contact.cellPhone) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    onPressFavorites(contact) {
+        let {favorites} = this.state;
+
+        let checkdubl=this.checkDublicates(contact);
+        if(checkdubl) {
+            Alert.alert(
+                'Contact manager',
+                'Contact already exist in favorites!',
+                [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ],
+                { cancelable: false }
+            );
+        } else {
+            Alert.alert(
+                'Contact manager',
+                'Contact added to favorites!',
+                [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ],
+                { cancelable: false }
+            );
+            favorites.unshift({
+                firstName: contact.firstName,
+                lastName: contact.lastName,
+                cellPhone: contact.cellPhone,
+            });
+        }
+
+        this.setState({favorites });
+        AsyncStorage.setItem('favorites', JSON.stringify(favorites));
     }
 
     render() {
@@ -28,8 +94,6 @@ export default class ContactDetails extends React.Component {
                 {this.state.contact !== 0 ?
                     <View>
                         <View>
-
-                            {/*<Button onPress={()=> {this.onPress()}} title="←Return to contact list"></Button>*/}
                             <View style={styles.skyBlue}>
                                 <TouchableHighlight underlayColor='#7fe2ff' onPress={()=>{this.onPress()}} style={{width:50}}>
                                     <View>
@@ -49,7 +113,7 @@ export default class ContactDetails extends React.Component {
                                 <Text style={styles.detailData}>{this.state.contact.cellPhone}</Text>
                             </View>
                         </View>
-                        <TouchableHighlight onPress={()=>{}}>
+                        <TouchableHighlight onPress={()=>{this.onPressFavorites(this.state.contact)}}>
                             <View>
                                 <Text style={styles.addToFavorites}>
                                     <IconF name="favorite" size={22} color="red"/>

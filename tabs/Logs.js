@@ -4,7 +4,6 @@ import {Text, View, Image, Button, StyleSheet, AsyncStorage,ScrollView,
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconL from 'react-native-vector-icons/FontAwesome';
 
-
 export default class Logs extends React.Component {
 
     constructor(props) {
@@ -12,7 +11,7 @@ export default class Logs extends React.Component {
         this.state = {
             text: '',
             logs:[],
-            noLogs:'No logs'
+            noLogs:''
         }
     }
 
@@ -23,31 +22,28 @@ export default class Logs extends React.Component {
     }
     }
 
-    componentWillMount() {
-
-        let {logs,noLogs} = this.state;
-
-        AsyncStorage.getItem('logs').then((data) => {
+    getLogs = () =>  {
+        let {logs} = this.state;
+                  // AsyncStorage.removeItem('logs');
+        return AsyncStorage.getItem('logs').then((data) => {
             if(data) {
                 this.setState({
                     logs: JSON.parse(data),
                 });
             } else {
-                this.setState({ logs: this.props.navigation.state.params.logs});
+                this.setState({
+                    logs
+                });
             }
         });
+    }
 
-        // this.props.navigation.dispatch(
-        //     {
-        //         type: 'Navigation/NAVIGATE',
-        //         routeName: 'Logs',
-        //         action: {
-        //             type: 'Navigation/NAVIGATE',
-        //             routeName: 'Logs',
-        //         }
-        //     }
-        // );
+    componentWillUpdate(){
+        this.getLogs();
+    }
 
+    componentWillMount() {
+        this.getLogs();
     }
 
     drawContent(log, index) {
@@ -71,17 +67,22 @@ export default class Logs extends React.Component {
     }
 
     render() {
+        // var seeLog;
+        //  if (this.state.logs) {
+        //      seeLog =<ScrollView style={styles.wrapper}>
+        //          {this.state.logs.map((log, index) => {
+        //              return this.drawContent(log, index)})}
+        //      </ScrollView>;
+        //
+        //  } else {
+        //      seeLog = <Text style={styles.text}>{this.state.noLogs}</Text>;
+        //  }
         return (
             <View>
-                {/*<Text style={styles.text}>Logs</Text>*/}
                 <ScrollView style={styles.wrapper}>
                     {this.state.logs && this.state.logs.map((log, index) => {
-                        return this.drawContent(log, index)
-                    })}
+                        return this.drawContent(log, index)})}
                 </ScrollView>
-
-                {/*<Text style={styles.text}>{this.state.noLogs}</Text>*/}
-
             </View>
         );
     }
@@ -104,10 +105,10 @@ const styles=StyleSheet.create({
     },
     contactName: {
         fontWeight:'700',
-        fontSize:22
+        fontSize:18
     },
     contactCell: {
-        fontSize:18
+        fontSize:15
     },
     image: {
         marginLeft: 10,
@@ -121,6 +122,7 @@ const styles=StyleSheet.create({
     logDuration: {
         marginLeft: 'auto',
         paddingTop:10,
-        paddingBottom:5
+        paddingBottom:5,
+        fontSize:10
     },
 });
