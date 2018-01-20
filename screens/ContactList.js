@@ -4,21 +4,25 @@ import { Text, View,
     Image, ScrollView,
     TouchableNativeFeedback,AsyncStorage,TextInput,
     TouchableHighlight,
-    Alert} from 'react-native';
+    Alert,FlatList} from 'react-native';
+import uuid from 'uuid';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default class ContactList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.onPressDetails = this.onPressDetails.bind(this);
-        this.onPressCall = this.onPressCall.bind(this);
-
         this.state = {
             contacts: [],
             text: '',
-            logs:[]
+            logs:[],
+            searchInput:'',
+            filteredArray:[]
         }
+
+        this.onPressDetails = this.onPressDetails.bind(this);
+        this.onPressCall = this.onPressCall.bind(this);
+        this.onPressAddContact=this.onPressAddContact.bind(this);
     }
 
     capitalize(val) {
@@ -27,7 +31,7 @@ export default class ContactList extends React.Component {
 
     componentDidMount() {
         let {contacts} = this.state;
-
+        //AsyncStorage.removeItem('contacts');
         AsyncStorage.getItem('contacts').then((data) => {
             if(data) {
                 this.setState({
@@ -40,8 +44,10 @@ export default class ContactList extends React.Component {
                         contacts.push({
                             firstName: this.capitalize(contact.name.first),
                             lastName: this.capitalize(contact.name.last),
-                            cellPhone: contact.cell
+                            cellPhone: contact.cell,
+                            id: uuid()
                         });
+                        this.setState({ text:contact.cell});
                         return contacts;
                     })
                     this.setState({ contacts});
@@ -65,8 +71,11 @@ export default class ContactList extends React.Component {
         this.props.navigation.navigate("ContactDetails", {contact: contact});
     }
 
-    onPressCall(contact) {
+    onPressAddContact(contact) {
+        this.props.navigation.navigate("AddNewContact", {contact: contact});
+    }
 
+    onPressCall(contact) {
         let {logs} = this.state;
         Alert.alert(
             'Contact manager',
@@ -83,13 +92,9 @@ export default class ContactList extends React.Component {
             cellPhone: contact.cellPhone,
             callDuration:'00:00:01'
         });
-        // this.props.navigation.navigate("Logs", {logs: logs});
         this.setState({logs });
         AsyncStorage.setItem('logs', JSON.stringify(logs));
-
     }
-
-
 
     drawContent(contact, index) {
         return (
@@ -97,10 +102,9 @@ export default class ContactList extends React.Component {
                 <View style={styles.contact}>
                     <Icon style={styles.image} name="user-circle" size={35} color="#b2edff"/>
                     <View style={styles.contactUser}>
-
                         <Text style={styles.contactName}>
                             <Text>{contact.firstName} </Text>
-                            <Text style={styles.contactNameLast}>{contact.lastName}</Text>
+                            <Text>{contact.lastName}</Text>
                         </Text>
                         <Text style={styles.contactCell}>{contact.cellPhone}</Text>
                     </View>
@@ -112,47 +116,175 @@ export default class ContactList extends React.Component {
         );
     }
 
+    // changeInput = (filteredArr) => {
+    //     let {contacts, searchInput} = this.state;
+    //     let value = searchInput;
+    //     for(var i=0;i<filteredArr.length;i++) {
+    //         let txt=filteredArr[i].cellPhone;
+    //         let idx = txt.indexOf(value);
+    //         if (idx >= 0) {
+    //             let newText = [txt.substring(0, idx), <Text
+    //                 style={styles.fireSearch}>{txt.substring(idx, idx + value.length)}</Text>, txt.substring(idx + value.length)];
+    //             // let replacePhoneText = txt.replace(txt, newText);
+    //             // if (~idx) {
+    //             //     txt[idx] = replacePhoneText;
+    //             this.setState({searchInput: value, contacts: [{
+    //                 cellPhone:newText}]});
+    //         } else {
+    //             this.setState({searchInput: value, contacts});
+    //         }
+    //     }
+        // return filteredArr.map(contact => {
+            // let txt = contact.cellPhone;
+            // let idx = txt.indexOf(value);
+            // if (idx >= 0) {
+            //     let newText = [txt.substring(0, idx), <Text
+            //         style={styles.fireSearch}>{txt.substring(idx, idx + value.length)}</Text>, txt.substring(idx + value.length)];
+            //     // let replacePhoneText = txt.replace(txt, newText);
+            //     // if (~idx) {
+            //     //     txt[idx] = replacePhoneText;
+            //         this.setState({searchInput: value, text: newText});
+            //     } else {
+            //         this.setState({searchInput: value, text: contact.cellPhone});
+            //     }
+
+        // })
+    // }
+        //let txt = document.getElementById("myText").innerText;
+        //let idx = txt.indexOf(value);
+        // if(idx >= 0) {
+        //     let newText = [txt.substring(0, idx), <strong>{txt.substring(idx, idx + value.length)}</strong>, txt.substring(idx + value.length)];
+        //     this.setState({inputValue: value, text: newText});
+        // } else {
+        //     this.setState({inputValue: value, text: this.initialText});
+        // }
+    // }
+
     render() {
-        return (
-            <View style={styles.container}>
-                <View style={styles.searchSection}>
-                    <Icon style={styles.searchIcon} name="search" size={20} color="#ccc"/>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Search"
-                        onChangeText={(searchString) => {this.setState({searchString})}}
-                        underlineColorAndroid="transparent"
-                    />
-                </View>
-                {/*<TextInput keyboardType={'phone-pad'}*/}
-                           {/*style={styles.searchInput}*/}
-                           {/*onChangeText={(text) => this.setState({text})}*/}
-                           {/*value={this.state.text}*/}
-                           {/*placeholder={'Search'}*/}
-                {/*></TextInput>*/}
-                <ScrollView style={styles.wrapper}>
-                    {this.state.contacts && this.state.contacts.map((contact, index) => {
-                        return this.drawContent(contact, index)
-                    })}
-                </ScrollView>
-                <TouchableHighlight onPress={()=>{}}>
+        const {contacts,searchInput}=this.state;
+        let filteredArr = contacts.filter(contact =>{
+            let phoneString=contact.cellPhone.toString();
+            let outString = phoneString.replace(/[-]/gi, '');
+            return outString.includes(searchInput);
+        })
+        let res;
+        let addNew=<TouchableHighlight onPress={()=>{this.onPressAddContact()}}>
                     <View>
-                        <Text style={styles.addButton}>
-                            <Icon name="user-plus" size={35} color="#fff"/>
+                        <Text style={styles.addButton}><Icon name="user-plus" size={35} color="#fff"/>
                             Add new contact</Text>
                     </View>
-                </TouchableHighlight>
+                    </TouchableHighlight>;
+        //filteredArray.push(filteredArr);
+        if(filteredArr.length===0 && this.state.searchInput) {
+            //     res= <Text style={styles.text}>Nothing found</Text>;
+            // } else if (filteredArr.length===0){
+            //     res=
+            //         <ScrollView style={styles.wrapper}>
+            //             {contacts && contacts.map((contact, index) => {
+            //                 return this.drawContent(contact, index)
+            //             })}
+            //         </ScrollView>
+            //      +addNew;
+            // } else {
+            //     res= <ScrollView style={styles.wrapper}>
+            //         {filteredArr && filteredArr.map((filt, index) => {
+            //             return this.drawContent(filt, index)
+            //         })}
+            //     </ScrollView> +addNew;
+            // }
 
-                {/*<Button onPress={() => { }} title={}/>*/}
-            </View>)
+            return (
+                <View style={styles.container}>
+                    <View style={styles.searchSection}>
+                        <Icon style={styles.searchIcon} name="search" size={20} color="#ccc"/>
+                        <TextInput
+                            style={styles.input}
+                            keyboardType={'phone-pad'}
+                            placeholder="Search"
+                            onChangeText={(searchInput) => this.setState({searchInput})}
+                            underlineColorAndroid="transparent"
+                            value={this.state.searchInput}
+                        />
+                    </View>
+                    {res}
+                    <Text style={styles.text}>Nothing found</Text>
+
+                </View>)
+
+        }else if (filteredArr.length===0){
+            return (
+                <View style={styles.container}>
+                    <View style={styles.searchSection}>
+                        <Icon style={styles.searchIcon} name="search" size={20} color="#ccc"/>
+                        <TextInput
+                            style={styles.input}
+                            keyboardType={'phone-pad'}
+                            placeholder="Search"
+                            onChangeText={(searchInput) => this.setState({searchInput})}
+                            underlineColorAndroid="transparent"
+                            value={this.state.searchInput}
+                        />
+                    </View>
+
+                    <ScrollView style={styles.wrapper}>
+                        {contacts && contacts.map((contact, index) => {
+                            return this.drawContent(contact, index)
+                        })}
+                    </ScrollView>
+                    <TouchableHighlight onPress={()=>{this.onPressAddContact()}}>
+                        <View>
+                            <Text style={styles.addButton}>
+                                <Icon name="user-plus" size={35} color="#fff"/>
+                                Add new contact</Text>
+                        </View>
+                    </TouchableHighlight>
+
+                </View>)
+        }
+         else {
+            return (
+                <View style={styles.container}>
+                    <View style={styles.searchSection}>
+                        <Icon style={styles.searchIcon} name="search" size={20} color="#ccc"/>
+                        <TextInput
+                            style={styles.input}
+                            keyboardType={'phone-pad'}
+                            placeholder="Search"
+                            onChangeText={(searchInput) => this.setState({searchInput})}
+                            underlineColorAndroid="transparent"
+                            value={this.state.searchInput}
+                            //onChange={()=>this.changeInput(filteredArr)}
+                            //onChange={this.changeInput(filteredArr)}
+                        />
+                    </View>
+
+                    <ScrollView style={styles.wrapper}>
+                        {filteredArr && filteredArr.map((filt, index) => {
+                            return this.drawContent(filt, index)
+                        })}
+                    </ScrollView>
+                    <TouchableHighlight onPress={()=>{this.onPressAddContact()}}>
+                        <View>
+                            <Text style={styles.addButton}>
+                                <Icon name="user-plus" size={35} color="#fff"/>
+                                Add new contact</Text>
+                        </View>
+                    </TouchableHighlight>
+
+                </View>)
+       }
+
     }
 }
 
 const styles = StyleSheet.create({
+    text: {
+        fontSize:20,
+        marginTop:10,
+        textAlign:'center',
+    },
     searchSection: {
-        // flex: 1,
-         flexDirection: 'row',
-        // justifyContent: 'center',
+        flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#eaeaea',
         padding:5,
@@ -176,12 +308,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginTop:10,
     },
-    // searchInput: {
-    //     borderColor: 'green',
-    //     borderWidth: 2,
-    //     fontSize:20,
-    //     padding:10
-    // },
     contact: {
         flexDirection: 'row',
         borderBottomWidth: 1,
@@ -195,10 +321,6 @@ const styles = StyleSheet.create({
     contactName: {
         fontWeight:'700',
         fontSize:18
-    },
-
-    contactNameLast: {
-
     },
     contactCell: {
         fontSize:15
@@ -221,5 +343,8 @@ const styles = StyleSheet.create({
         backgroundColor:'#004e66',
         padding:5,
         color:'#fff'
+    },
+    fireSearch : {
+        color:'red'
     },
 });

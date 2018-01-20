@@ -52,7 +52,6 @@ export default class Logs extends React.Component {
                 <View style={styles.contact}>
                     <IconL style={styles.image} name="user-circle" size={35} color="#b2edff"/>
                     <View style={styles.contactUser}>
-
                         <Text style={styles.contactName}>
                             <Text>{log.firstName} </Text>
                             <Text style={styles.contactNameLast}>{log.lastName}</Text>

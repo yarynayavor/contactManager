@@ -35,9 +35,7 @@ var MainScreenNavigator=TabNavigator ({
             labelStyle: {
                 fontSize:11
             },
-
         },
-
     }
 );
 

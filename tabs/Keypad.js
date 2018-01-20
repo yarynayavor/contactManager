@@ -1,110 +1,124 @@
 import React from 'react';
-import {Text,View,Image,Button,StyleSheet,TextInput} from 'react-native';
+import {Text, View, Image, Button, StyleSheet, TextInput, AsyncStorage,TouchableNativeFeedback ,TouchableHighlight
+,ScrollView} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-// import Keyboard from 'react-native-keyboard';
-// import PropTypes from 'prop-types';
-
-// let model = {
-
-    // _keys: [],
-    //
-    // _listeners: [],
-    //
-    // addKey(key) {
-    //     this._keys.push(key);
-    //     this._notify();
-    // },
-    //
-    // delKey() {
-    //     this._keys.pop();
-    //     this._notify();
-    // },
-    //
-    // clearAll() {
-    //     this._keys = [];
-    //     this._notify();
-    // },
-    //
-    // getKeys() {
-    //     return this._keys;
-    // },
-    //
-    // onChange(listener) {
-    //     if (typeof listener === 'function') {
-    //         this._listeners.push(listener);
-    //     }
-    // },
-    //
-    // _notify() {
-    //     this._listeners.forEach((listner) => {
-    //         listner(this);
-    //     });
-    // }
-// };
-
-// React.Component.propTypes = {
-//     text: PropTypes.string.isRequired,
-// };
-
+import IconF from 'react-native-vector-icons/FontAwesome';
 
 export default class Keypad extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { text: '' };
+        this.state = {
+            text: '',
+            contacts:[],
+            searchInput:''
+        };
     }
-
-    // constructor(props) {
-    //     super(props);
-    //     this.state = {
-    //         text: ''
-    //     };
-    // }
-    //
-    // componentDidMount() {
-    //     model.onChange((model) => {
-    //         this.setState({text: model.getKeys().join('')});
-    //     });
-    // }
-    //
-    // _handleClear() {
-    //     model.clearAll();
-    // }
-    //
-    // _handleDelete() {
-    //     model.delKey();
-    // }
-    //
-    // _handleKeyPress(key) {
-    //     model.addKey(key);
-    // }
-
     static navigationOptions = {
         tabBarLabel:'Keypad',
         tabBarIcon: () => {
             return <Icon name="md-keypad" size={25} color="#fff"/>;
         }
     }
-    render() {
+
+    getContacts = () =>  {
+        let {contacts} = this.state;
+        // AsyncStorage.removeItem('favorites');
+        return AsyncStorage.getItem('contacts').then((data) => {
+            if(data) {
+                this.setState({
+                    contacts: JSON.parse(data),
+                });
+            } else {
+                this.setState({
+                    contacts
+                });
+            }
+        });
+    }
+
+    componentWillUpdate(){
+        this.getContacts();
+    }
+
+    componentWillMount() {
+        this.getContacts();
+    }
+
+    drawContent(contact, index) {
         return (
-            <View style={{flex: 1}}>
-                <Text style={styles.text}>Enter number</Text>
-                <TextInput keyboardType={'phone-pad'}
-                           style={{height: 40, borderColor: 'gray', borderWidth: 1,fontSize:20}}
-                           onChangeText={(text) => this.setState({text})}
-                           value={this.state.text}
-                />
-                {/*<View style={{flex: 1}}>*/}
-                    {/*<Text style={styles.text}>{this.state.text}</Text>*/}
-                {/*</View>*/}
-                {/*<Keyboard*/}
-                    {/*keyboardType="decimal-pad"*/}
-                    {/*onClear={this._handleClear.bind(this)}*/}
-                    {/*onDelete={this._handleDelete.bind(this)}*/}
-                    {/*onKeyPress={this._handleKeyPress.bind(this)}*/}
-                {/*/>*/}
-            </View>
+            <TouchableNativeFeedback key={index} onPress={()=> {}}>
+                <View style={styles.contact}>
+                    <IconF style={styles.image} name="user-circle" size={35} color="#b2edff"/>
+                    <View style={styles.contactUser}>
+                        <Text style={styles.contactName}>
+                            <Text>{contact.firstName} </Text>
+                            <Text>{contact.lastName}</Text>
+                        </Text>
+                        <Text style={styles.contactCell}>{contact.cellPhone}</Text>
+                    </View>
+                    <TouchableHighlight underlayColor='#99ff9a' style={styles.dial} onPress={()=>{}}>
+                        <IconF  name="phone" size={35} color="#00cc03"/>
+                    </TouchableHighlight>
+                </View>
+            </TouchableNativeFeedback>
         );
+    }
+    render() {
+        const {contacts,searchInput}=this.state;
+        let filteredArr = contacts.filter(contact =>{
+            let phoneString=contact.cellPhone.toString();
+            let outString = phoneString.replace(/[-]/gi, '');
+            return outString.includes(searchInput);
+        })
+        if(filteredArr.length===0 && this.state.searchInput) {
+            return (
+                <View style={{flex: 1}}>
+                    <Text style={styles.text}>Enter phone number</Text>
+                    <TextInput keyboardType={'phone-pad'}
+                               style={{height: 40, borderColor: 'gray', borderWidth: 1,fontSize:20}}
+                               onChangeText={(searchInput) => this.setState({searchInput})}
+                               underlineColorAndroid="transparent"
+                               value={this.state.searchInput}
+                               placeholder="Search"
+                    />
+                    <Text style={styles.textNotFound}>Nothing found</Text>
+                </View>
+            );
+        } else if(filteredArr.length===0 && this.state.searchInput.length===0) {
+            return (
+                <View style={{flex: 1}}>
+                    <Text style={styles.text}>Enter phone number</Text>
+                    <TextInput keyboardType={'phone-pad'}
+                               value={this.state.searchInput}
+                               style={{height: 40, borderColor: 'gray', borderWidth: 1,fontSize:20}}
+                               onChangeText={(searchInput) => this.setState({searchInput})}
+                               underlineColorAndroid="transparent"
+                               placeholder="Search"
+                    />
+                </View>
+            );
+        }
+        else {
+            return (
+                <View style={{flex: 1}}>
+                    <Text style={styles.text}>Enter phone number</Text>
+                    <TextInput keyboardType={'phone-pad'}
+                               value={this.state.searchInput}
+                               style={{height: 40, borderColor: 'gray', borderWidth: 1,fontSize:20}}
+                               onChangeText={(searchInput) => this.setState({searchInput})}
+                               underlineColorAndroid="transparent"
+                               placeholder="Search"
+                    />
+                    {/*<ScrollView style={styles.wrapper}>*/}
+                        {/*{filteredArr && filteredArr.map((filt, index) => {*/}
+                            {/*return this.drawContent(filt, index)*/}
+                        {/*})}*/}
+                    {/*</ScrollView>*/}
+                </View>
+            );
+        }
+
     }
 }
 
@@ -113,6 +127,11 @@ const styles=StyleSheet.create({
         fontSize:25,
         marginTop:30,
         backgroundColor:'#6f8888',
+        textAlign:'center',
+    },
+    textNotFound: {
+        fontSize:20,
+        marginTop:10,
         textAlign:'center',
     },
 });

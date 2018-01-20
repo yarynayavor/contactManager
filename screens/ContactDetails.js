@@ -2,6 +2,7 @@ import React from 'react';
 import {Text, View, Image, StyleSheet, Button, TouchableHighlight, AsyncStorage, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IconF from 'react-native-vector-icons/MaterialIcons';
+import uuid from 'uuid';
 
 
 export default class ContactDetails extends React.Component {
@@ -10,6 +11,7 @@ export default class ContactDetails extends React.Component {
         super();
         this.state = {
             contact: [],
+            contacts: [],
             favorites:[]
         }
 
@@ -18,9 +20,7 @@ export default class ContactDetails extends React.Component {
     }
 
     componentDidMount() {
-
-
-        let {favorites} = this.state;
+        let {contacts} = this.state;
         this.setState({ contact: this.props.navigation.state.params.contact });
         AsyncStorage.getItem('favorites').then((data) => {
             if(data) {
@@ -29,16 +29,40 @@ export default class ContactDetails extends React.Component {
                 });
             }
         });
+
+        AsyncStorage.getItem('contacts').then((data) => {
+            if(data) {
+                this.setState({
+                    contacts: JSON.parse(data),
+                });
+            } else {
+                this.setState({
+                    contacts
+                });
+            }
+        });
     }
 
-    deleteContact(contact) {
-        // let {contacts} = this.state;
-        // let _contacts = contacts.filter(c => c.id != _id);
-        // localStorage.setItem('tasks', JSON.stringify(_contacts));
-        //
-        // this.setState({
-        //     contacts: _contacts
-        // })
+    deleteContact(_id) {
+        let {contacts,favorites} = this.state;
+        let _contacts = contacts.filter(c => c.id != _id);
+        let _favorites = favorites.filter(c => c.id != _id);
+        Alert.alert(
+            'Contact manager',
+            'Contact deleted',
+            [
+                {text: 'OK', onPress: () => console.log('OK Pressed')},
+            ],
+            { cancelable: false }
+        );
+        AsyncStorage.setItem('contacts', JSON.stringify(_contacts));
+        AsyncStorage.setItem('favorites', JSON.stringify(_favorites));
+        this.setState({
+            contacts: _contacts,
+            favorites: _favorites
+
+        })
+        this.props.navigation.navigate("ContactList", {contacts: contacts});
     }
 
     onPress() {
@@ -48,7 +72,7 @@ export default class ContactDetails extends React.Component {
     checkDublicates(contact) {
         let {favorites} = this.state;
         for (var i = 0; i < favorites.length; i++) {
-            if(favorites[i].cellPhone==contact.cellPhone) {
+            if(favorites[i].cellPhone===contact.cellPhone) {
                 return true;
             }
         }
@@ -77,13 +101,21 @@ export default class ContactDetails extends React.Component {
                 ],
                 { cancelable: false }
             );
+            // contacts.map((contact) => {
+            //     contact.favorites = !contact.favorites;
+            //     AsyncStorage.setItem('contacts', JSON.stringify(contacts));
+            //
+            //     return contact;
+            // });
+
             favorites.unshift({
                 firstName: contact.firstName,
                 lastName: contact.lastName,
                 cellPhone: contact.cellPhone,
+                id:contact.id
             });
         }
-
+        //
         this.setState({favorites });
         AsyncStorage.setItem('favorites', JSON.stringify(favorites));
     }
@@ -120,7 +152,7 @@ export default class ContactDetails extends React.Component {
                                     Add to favorites</Text>
                             </View>
                         </TouchableHighlight>
-                        <TouchableHighlight style={{marginTop:5}} onPress={()=>{}}>
+                        <TouchableHighlight style={{marginTop:5}} onPress={()=>{this.deleteContact(this.state.contact.id)}}>
                             <View>
                                 <Text style={styles.deleteContact}>
                                     <Icon name="trash" size={22} color="#fff"/>

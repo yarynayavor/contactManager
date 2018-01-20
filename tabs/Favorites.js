@@ -10,7 +10,8 @@ export default class Favorites extends React.Component {
         super(props);
         this.state = {
             text: '',
-            favorites:[],
+            favorites:[]
+            //contacts:[]
         }
     }
 
@@ -46,36 +47,42 @@ export default class Favorites extends React.Component {
     }
 
     drawContent(favorite, index) {
-        return (
-            <TouchableNativeFeedback key={index} onPress={()=> {}}>
-                <View style={styles.contact}>
-                    <IconL style={styles.image} name="user-circle" size={35} color="#b2edff"/>
-                    <View style={styles.contactUser}>
+            return (
+                <TouchableNativeFeedback key={index} onPress={() => {
+                }}>
+                    <View style={styles.contact}>
+                        <IconL style={styles.image} name="user-circle" size={35} color="#b2edff"/>
+                        <View style={styles.contactUser}>
 
-                        <Text style={styles.contactName}>
-                            <Text>{favorite.firstName} </Text>
-                            <Text style={styles.contactNameLast}>{favorite.lastName}</Text>
-                        </Text>
-                        <Text style={styles.contactCell}>{favorite.cellPhone}</Text>
+                            <Text style={styles.contactName}>
+                                <Text>{favorite.firstName} </Text>
+                                <Text>{favorite.lastName}</Text>
+                            </Text>
+                            <Text style={styles.contactCell}>{favorite.cellPhone}</Text>
+                        </View>
+                        <Icon style={styles.favorites} name="favorite" size={45} color="red"/>
                     </View>
-                    <Icon style={styles.favorites} name="favorite" size={45} color="red"/>
-                </View>
-            </TouchableNativeFeedback>
-        );
+                </TouchableNativeFeedback>
+            );
     }
 
+    noFavorites() {
+        return (
+            <Text>No favorites</Text>
+        );
+    }
     render() {
         return (
             <View>
-                {/*<Text style={styles.text}>Logs</Text>*/}
                 <ScrollView style={styles.wrapper}>
-                    {this.state.favorites && this.state.favorites.map((favorite, index) => {
-                        return this.drawContent(favorite, index)
+                    {this.state.favorites && this.state.favorites.map((f, index) => {
+                        // if(f.favorites===true) {
+                            return this.drawContent(f, index)
+                        // } else {
+                        //      return this.noFavorites()
+                        //  }
                     })}
                 </ScrollView>
-
-                {/*<Text style={styles.text}>{this.state.noLogs}</Text>*/}
-
             </View>
         );
     }
@@ -113,20 +120,3 @@ const styles=StyleSheet.create({
         paddingBottom:5
     },
 });
-//     render() {
-//         return (
-//             <View>
-//                 <Text style={styles.text}>Favorites</Text>
-//             </View>
-//         );
-//     }
-// }
-//
-// const styles=StyleSheet.create({
-//     text: {
-//         fontSize:25,
-//         marginTop:30,
-//         backgroundColor:'#6f8888',
-//         textAlign:'center',
-//     },
-// });
