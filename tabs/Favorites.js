@@ -11,7 +11,6 @@ export default class Favorites extends React.Component {
         this.state = {
             text: '',
             favorites:[]
-            //contacts:[]
         }
     }
 
@@ -65,22 +64,12 @@ export default class Favorites extends React.Component {
                 </TouchableNativeFeedback>
             );
     }
-
-    noFavorites() {
-        return (
-            <Text>No favorites</Text>
-        );
-    }
     render() {
         return (
             <View>
                 <ScrollView style={styles.wrapper}>
                     {this.state.favorites && this.state.favorites.map((f, index) => {
-                        // if(f.favorites===true) {
                             return this.drawContent(f, index)
-                        // } else {
-                        //      return this.noFavorites()
-                        //  }
                     })}
                 </ScrollView>
             </View>

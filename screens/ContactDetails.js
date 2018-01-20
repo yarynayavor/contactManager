@@ -101,13 +101,6 @@ export default class ContactDetails extends React.Component {
                 ],
                 { cancelable: false }
             );
-            // contacts.map((contact) => {
-            //     contact.favorites = !contact.favorites;
-            //     AsyncStorage.setItem('contacts', JSON.stringify(contacts));
-            //
-            //     return contact;
-            // });
-
             favorites.unshift({
                 firstName: contact.firstName,
                 lastName: contact.lastName,
@@ -115,7 +108,7 @@ export default class ContactDetails extends React.Component {
                 id:contact.id
             });
         }
-        //
+
         this.setState({favorites });
         AsyncStorage.setItem('favorites', JSON.stringify(favorites));
     }

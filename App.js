@@ -4,10 +4,6 @@ import { StyleSheet, Text, View,StatusBar  } from 'react-native';
 
 export default class App extends React.Component {
 
-constructor() {
-super();
-
-}
   render() {
     return (
         <View style={{flex: 1}}>
@@ -17,10 +13,6 @@ super();
                        hidden={true} />
             <AllTabs/>
         </View>
-
-
-
     );
   }
 }
-

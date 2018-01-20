@@ -10,8 +10,7 @@ export default class Logs extends React.Component {
         super(props);
         this.state = {
             text: '',
-            logs:[],
-            noLogs:''
+            logs:[]
         }
     }
 
@@ -54,7 +53,7 @@ export default class Logs extends React.Component {
                     <View style={styles.contactUser}>
                         <Text style={styles.contactName}>
                             <Text>{log.firstName} </Text>
-                            <Text style={styles.contactNameLast}>{log.lastName}</Text>
+                            <Text>{log.lastName}</Text>
                         </Text>
                         <Text style={styles.contactCell}>{log.cellPhone}</Text>
                     </View>
@@ -76,14 +75,14 @@ export default class Logs extends React.Component {
         //  } else {
         //      seeLog = <Text style={styles.text}>{this.state.noLogs}</Text>;
         //  }
-        return (
-            <View>
-                <ScrollView style={styles.wrapper}>
-                    {this.state.logs && this.state.logs.map((log, index) => {
-                        return this.drawContent(log, index)})}
-                </ScrollView>
-            </View>
-        );
+            return (
+                <View>
+                    <ScrollView style={styles.wrapper}>
+                        {this.state.logs && this.state.logs.map((log, index) => {
+                            return this.drawContent(log, index)})}
+                    </ScrollView>
+                </View>
+            );
     }
 }
 

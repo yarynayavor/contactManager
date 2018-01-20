@@ -96,7 +96,6 @@ export default class AddNewContact extends React.Component {
                 { cancelable: false }
             );
         }
-
     }
 
     render() {
